@@ -1,0 +1,5 @@
+/* extension: backup / import tab */
+label.filepick { margin: 8px 0 0; font-weight: 600; }
+label.filepick input[type=file] { font: inherit; font-weight: 400; color: var(--text); }
+#importMsg p, #backupMsg { margin: 4px 0; }
+#livePath, #vodPath { color: var(--text); }

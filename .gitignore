@@ -1,0 +1,8 @@
+# build output (store zips are made with: python build.py)
+dist/
+# local tool state
+.omc/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

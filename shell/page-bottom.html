@@ -1,0 +1,39 @@
+<main class="layout hidden" id="tab-backup">
+  <div class="column">
+    <section class="card">
+      <h2>백업</h2>
+      <p class="hint">메모는 이 브라우저의 확장 프로그램 저장소에만 있습니다. 확장 프로그램을 삭제하거나 브라우저 데이터를 초기화하면 함께 지워지니, 가끔 백업 파일을 받아 두세요.</p>
+      <button type="button" id="backupExport" class="primary">전체 백업 파일 받기</button>
+      <p id="backupMsg" class="hint" role="status" aria-live="polite"></p>
+    </section>
+    <section class="card">
+      <h2>가져오기</h2>
+      <p class="hint">이 확장 프로그램의 백업 파일, 또는 데스크톱 STT Timeline의 <code>live_memos.json</code> · <code>vod_memos.json</code>(문서\STT_Timeline 폴더)을 고르세요. 여러 파일을 한 번에 골라도 됩니다.</p>
+      <p class="hint">목록에 없는 채널 · 영상 · 메모만 더합니다. 이미 있는 메모는 바꾸거나 지우지 않습니다.</p>
+      <label class="filepick">가져올 파일 고르기
+        <input type="file" id="importFile" accept=".json,application/json" multiple>
+      </label>
+      <div id="importMsg" class="msg" role="status" aria-live="polite"></div>
+    </section>
+  </div>
+  <div class="column">
+    <section class="card">
+      <h2>정보</h2>
+      <dl class="kv">
+        <dt>저장 위치</dt><dd>이 브라우저 (확장 프로그램 저장소)</dd>
+        <dt>외부 통신</dt><dd>api.chzzk.naver.com — 채널 · 방송 · 다시보기 정보 조회만</dd>
+        <dt>수집하는 정보</dt><dd>없음. 메모는 어디로도 보내지 않습니다.</dd>
+      </dl>
+      <p class="hint">치지직(NAVER)이 만들거나 승인한 도구가 아닙니다.</p>
+    </section>
+  </div>
+</main>
+
+<script src="lib/chzzk.js"></script>
+<script src="lib/livestore.js"></script>
+<script src="lib/vodstore.js"></script>
+<script src="lib/backend.js"></script>
+<script src="vodmemo.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

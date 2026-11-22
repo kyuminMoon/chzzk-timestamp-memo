@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>합방 타임스탬프 메모</title>
+  <link rel="icon" href="icons/icon32.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">합방 타임스탬프 메모 <span class="ver" id="ver"></span></div>
+  <div class="sysinfo">치지직 비공식 도구 · 메모는 이 브라우저에만 저장됩니다</div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button type="button" class="tab active" role="tab" data-tab="live">라이브 메모</button>
+  <button type="button" class="tab" role="tab" data-tab="vod">다시보기 시간 찾기</button>
+  <button type="button" class="tab" role="tab" data-tab="backup">백업 · 가져오기</button>
+</nav>
+
+<main class="layout" id="tab-live">
+  <div class="column">
+    <section class="card">
+      <h2>메모 쓰기</h2>
+      <div class="row">
+        <input id="liveText" type="text" maxlength="500" placeholder="메모 (예: [하렌] - 서울의 달) · Enter로 저장, 비워 둬도 됩니다">
+        <button type="button" id="liveSave" class="primary">저장</button>
+      </div>
+      <p id="liveTargets" class="livetargets"></p>
+      <div id="liveSaveMsg" class="msg"></div>
+      <div class="livetime">
+        <label>날짜
+          <input id="liveDate" type="date">
+        </label>
+        <label>실제 시각
+          <input id="liveTime" type="time" step="1">
+        </label>
+        <button type="button" id="liveNow" class="secondary">지금으로</button>
+      </div>
+      <p id="liveTimeMode" class="hint"></p>
+      <p class="hint">체크한 방송마다 그 시각이 방송 몇 분 지점인지 따로 저장합니다. 방송 위치 = 실제 시각 − 방송 시작 시각 − 4초(시청자 화면이 늦게 나오는 만큼)이고, 다시보기에서도 같은 위치입니다. 보는 환경에 따라 몇 초 차이가 날 수 있으니 조금 앞에서부터 확인하세요.</p>
+    </section>
+
+    <section class="card">
+      <h2>방송 목록</h2>
+      <div class="row">
+        <input id="liveUrl" type="text" placeholder="https://chzzk.naver.com/live/채널ID (채널 주소도 됩니다)">
+        <button type="button" id="liveAdd" class="primary">추가</button>
+      </div>
+      <p id="liveAddMsg" class="hint"></p>
+      <div class="row between">
+        <span class="hint">메모할 방송에 체크하세요. 체크한 상태는 저장되어 다음에 열어도 유지됩니다.</span>
+        <div class="row">
+          <button type="button" id="liveCheckAll" class="secondary small">모두 체크</button>
+          <button type="button" id="liveCheckNone" class="secondary small">모두 해제</button>
+          <button type="button" id="liveRefresh" class="secondary small">새로고침</button>
+        </div>
+      </div>
+      <div id="liveChannels" class="livechannels"></div>
+    </section>
+  </div>
+
+  <div class="column">
+    <section class="card">
+      <h2>저장한 메모</h2>
+      <div id="liveFilter" class="chips"></div>
+      <div class="row between livetools">
+        <div class="chips" id="liveSort">
+          <button type="button" class="chip on" data-sort="new">최신 순</button>
+          <button type="button" class="chip" data-sort="old">오래된 순</button>
+        </div>
+        <div class="row">
+          <button type="button" id="liveCopyWall" class="secondary small" title="줄마다 (실제시간 - yyyy-MM-dd HH:mm:ss)를 앞에 붙여 복사">실제 시간 포함 복사</button>
+          <button type="button" id="liveCopy" class="primary small">전체 복사</button>
+        </div>
+      </div>
+      <div class="liveshift">
+        <label class="liveshiftlabel" for="liveShift">복사 시간 보정</label>
+        <input id="liveShift" type="text" inputmode="numeric" maxlength="8" placeholder="0" autocomplete="off" aria-describedby="liveShiftNote">
+        <span>초</span>
+        <span id="liveShiftNote" class="hint" aria-live="polite"></span>
+      </div>
+      <div id="liveMemos" class="livememos"></div>
+      <p class="hint">저장 위치: <span id="livePath"></span> · 백업 탭에서 파일로 받아 둘 수 있습니다.</p>
+      <p id="liveNotice" class="error"></p>
+    </section>
+
+    <section class="card" id="draftCard">
+      <h2>댓글 다듬기</h2>
+      <p class="hint">복사한 메모를 붙여 넣고(Ctrl+V) 자유롭게 고친 뒤 다시 복사하세요. 라이브 메모와 다시보기 탭에서 같은 칸을 씁니다. 쓴 내용은 이 브라우저에 자동으로 남습니다. "시각 보정 적용"은 지금 탭의 복사 시간 보정만큼 줄 맨 앞의 시각을 옮깁니다.</p>
+      <textarea id="liveDraft" rows="8" spellcheck="false" aria-label="댓글 다듬기" placeholder="00:10:01 노래1 - 첫 곡&#10;01:10:10 노래2"></textarea>
+      <div class="row wrap livetools">
+        <button type="button" id="liveDraftShift" class="secondary small" disabled>시각 보정 적용</button>
+        <button type="button" id="liveDraftCopy" class="primary small">복사</button>
+        <button type="button" id="liveDraftClear" class="linkbtn">비우기</button>
+        <span id="liveDraftMsg" class="hint" aria-live="polite"></span>
+      </div>
+    </section>
+  </div>
+</main>
+
+<main class="layout hidden" id="tab-vod">
+  <div class="column">
+    <section class="card">
+      <h2>실제 시각으로 찾기</h2>
+      <label for="vodWallTime">실제 시각 (한국 시간)</label>
+      <div class="row">
+        <input id="vodWallTime" type="text" placeholder="26-11-11 21:11:11" maxlength="32" aria-describedby="vodTimeHelp vodFindMsg" autocomplete="off">
+        <button type="button" id="vodFind" class="primary">찾기</button>
+      </div>
+      <p id="vodTimeHelp" class="hint">YY-MM-dd HH:mm:ss 또는 YYYY-MM-dd HH:mm:ss · 초까지 입력하고 Enter</p>
+      <p id="vodFindMsg" role="status" aria-live="polite"></p>
+      <div id="vodResults" class="vodlist"></div>
+      <div class="row wrap vodresultacts">
+        <button type="button" id="vodResultsAll" class="secondary small">모두 체크</button>
+        <button type="button" id="vodResultsNone" class="secondary small">모두 해제</button>
+        <button type="button" id="vodCopySelected" class="secondary small">체크한 결과 복사</button>
+      </div>
+      <label for="vodMemoText">메모 (선택)</label>
+      <div class="row">
+        <input id="vodMemoText" type="text" maxlength="500" placeholder="예: [하렌] - 서울의 달 · Enter로 저장">
+        <button type="button" id="vodSave" class="primary">체크한 결과에 저장</button>
+      </div>
+      <div id="vodSaveMsg" role="status" aria-live="polite"></div>
+      <details class="vodbatch" id="vodBatchBox">
+        <summary>여러 줄 한 번에 저장 — 라이브 메모의 "실제 시간 포함 복사"를 그대로 붙여 넣기</summary>
+        <p class="hint">한 줄에 메모 하나. 줄 맨 앞의 실제 시각으로 체크한 다시보기마다 위치를 찾아 저장합니다. 이미 저장된 같은 메모는 건너뜁니다.</p>
+        <textarea id="vodBatch" rows="5" spellcheck="false" placeholder="(실제시간 - 2026-11-21 23:30:31) 00:58:10 [사이테] - 바보같이&#10;26-11-21 23:41:00 [하렌] - Je Veux Vivre"></textarea>
+        <div class="row wrap">
+          <button type="button" id="vodBatchSave" class="primary small">체크한 다시보기에 모두 저장</button>
+          <span id="vodBatchMsg" class="hint" role="status" aria-live="polite"></span>
+        </div>
+      </details>
+      <p class="hint">기본 4초 보정을 사용합니다. 버퍼링·재연결·편집 때문에 수 초 이상 차이가 날 수 있습니다. 영상별 시간 보정으로 조절하세요.</p>
+    </section>
+
+    <section class="card">
+      <h2 tabindex="-1" id="vodListTitle">다시보기 목록</h2>
+      <label for="vodUrls">치지직 다시보기 링크 (한 줄에 하나씩, 여러 개 가능)</label>
+      <textarea id="vodUrls" rows="2" maxlength="32768" placeholder="https://chzzk.naver.com/video/16136287&#10;https://chzzk.naver.com/video/16136497"></textarea>
+      <div class="row wrap">
+        <button type="button" id="vodAdd" class="primary">추가</button>
+        <button type="button" id="vodRefresh" class="secondary">정보 새로고침</button>
+        <span class="hint">Ctrl+Enter로 추가 · 최대 50개</span>
+      </div>
+      <p id="vodAddMsg" role="status" aria-live="polite" class="hint"></p>
+      <div class="row between">
+        <span class="hint">체크한 다시보기에서 시각을 찾습니다. 영상이나 채팅은 내려받지 않습니다.</span>
+        <div class="row">
+          <button type="button" id="vodVideosAll" class="secondary small">모두 체크</button>
+          <button type="button" id="vodVideosNone" class="secondary small">모두 해제</button>
+        </div>
+      </div>
+      <div id="vodVideos" class="vodlist"></div>
+    </section>
+  </div>
+
+  <div class="column">
+    <section class="card">
+      <h2>저장한 메모</h2>
+      <div class="chips" id="vodMemoFilter"></div>
+      <div class="row between livetools">
+        <div class="chips" id="vodSort">
+          <button type="button" class="chip on" data-sort="new">최신 순</button>
+          <button type="button" class="chip" data-sort="old">오래된 순</button>
+        </div>
+        <div class="row">
+          <button type="button" id="vodCopyWall" class="secondary small" title="줄마다 (실제시간 - yyyy-MM-dd HH:mm:ss)를 앞에 붙여 복사">실제 시간 포함 복사</button>
+          <button type="button" id="vodCopyMemos" class="primary small">전체 복사</button>
+        </div>
+      </div>
+      <div class="liveshift">
+        <label class="liveshiftlabel" for="vodShift">복사 시간 보정</label>
+        <input id="vodShift" type="text" inputmode="numeric" maxlength="8" placeholder="0" autocomplete="off" aria-describedby="vodShiftNote">
+        <span>초</span>
+        <span id="vodShiftNote" class="hint" aria-live="polite"></span>
+      </div>
+      <div id="vodMemos" class="livememos"></div>
+      <p class="hint">저장 위치: <span id="vodPath"></span></p><p id="vodNotice" class="error" role="status"></p>
+    </section>
+    <section class="card hidden" id="vodCopyBox">
+      <label for="vodCopyFallback">자동 복사를 사용할 수 없습니다. 아래 내용을 선택해 Ctrl+C로 복사하세요.</label>
+      <textarea id="vodCopyFallback" readonly rows="6"></textarea>
+    </section>
+    <section class="card hidden" id="vodRecoveryBox">
+      <label for="vodRecovered">이전 저장 요청 보관본 — 저장소가 변경되어 자동으로 다시 저장하지 않았습니다.</label>
+      <textarea id="vodRecovered" readonly rows="6"></textarea>
+      <button type="button" id="vodDismissRecovery" class="secondary small">보관본 확인 완료</button>
+    </section>
+  </div>
+</main>
+
+<main class="layout hidden" id="tab-backup">
+  <div class="column">
+    <section class="card">
+      <h2>백업</h2>
+      <p class="hint">메모는 이 브라우저의 확장 프로그램 저장소에만 있습니다. 확장 프로그램을 삭제하거나 브라우저 데이터를 초기화하면 함께 지워지니, 가끔 백업 파일을 받아 두세요.</p>
+      <button type="button" id="backupExport" class="primary">전체 백업 파일 받기</button>
+      <p id="backupMsg" class="hint" role="status" aria-live="polite"></p>
+    </section>
+    <section class="card">
+      <h2>가져오기</h2>
+      <p class="hint">이 확장 프로그램의 백업 파일, 또는 데스크톱 STT Timeline의 <code>live_memos.json</code> · <code>vod_memos.json</code>(문서\STT_Timeline 폴더)을 고르세요. 여러 파일을 한 번에 골라도 됩니다.</p>
+      <p class="hint">목록에 없는 채널 · 영상 · 메모만 더합니다. 이미 있는 메모는 바꾸거나 지우지 않습니다.</p>
+      <label class="filepick">가져올 파일 고르기
+        <input type="file" id="importFile" accept=".json,application/json" multiple>
+      </label>
+      <div id="importMsg" class="msg" role="status" aria-live="polite"></div>
+    </section>
+  </div>
+  <div class="column">
+    <section class="card">
+      <h2>정보</h2>
+      <dl class="kv">
+        <dt>저장 위치</dt><dd>이 브라우저 (확장 프로그램 저장소)</dd>
+        <dt>외부 통신</dt><dd>api.chzzk.naver.com — 채널 · 방송 · 다시보기 정보 조회만</dd>
+        <dt>수집하는 정보</dt><dd>없음. 메모는 어디로도 보내지 않습니다.</dd>
+      </dl>
+      <p class="hint">치지직(NAVER)이 만들거나 승인한 도구가 아닙니다.</p>
+    </section>
+  </div>
+</main>
+
+<script src="lib/chzzk.js"></script>
+<script src="lib/livestore.js"></script>
+<script src="lib/vodstore.js"></script>
+<script src="lib/backend.js"></script>
+<script src="vodmemo.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
